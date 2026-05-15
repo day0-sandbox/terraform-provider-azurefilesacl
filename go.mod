@@ -1,4 +1,4 @@
-module github.com/day0-sandbox/terraform-provider-azurefilesacl
+module github.com/day0sh/terraform-provider-azurefilesacl
 
 go 1.25.8
 
