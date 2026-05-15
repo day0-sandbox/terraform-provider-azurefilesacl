@@ -1,11 +1,22 @@
-# terraform-provider-azacl
+# terraform-provider-azurefilesacl
 
 Terraform provider for managing Windows ACLs on Azure Files directories and files.
 
 This provider is designed for Azure Virtual Desktop and FSLogix deployments that need Terraform-managed NTFS-style ACLs on Azure Files. It replaces ad hoc post-apply ACL scripts with a declarative resource:
 
 ```hcl
-resource "azacl_file_acl" "profiles_root" {
+terraform {
+  required_providers {
+    azurefilesacl = {
+      source  = "day0-sandbox/azurefilesacl"
+      version = "~> 0.1"
+    }
+  }
+}
+```
+
+```hcl
+resource "azurefilesacl_file_acl" "profiles_root" {
   storage_account_name = var.storage_account_name
   share_name           = var.share_name
   path                 = "/"
@@ -43,7 +54,7 @@ Important: `azurerm_storage_share.acl` is a SAS stored access policy. It is not 
 ## Provider Configuration
 
 ```hcl
-provider "azacl" {
+provider "azurefilesacl" {
   tenant_id               = var.tenant_id
   auth_method             = "oauth"
   storage_endpoint_suffix = "core.windows.net"
@@ -68,7 +79,7 @@ Supported authentication methods:
 
 ## Resource
 
-### `azacl_file_acl`
+### `azurefilesacl_file_acl`
 
 Manages the Windows ACL for one Azure Files directory or file.
 
@@ -220,7 +231,7 @@ Import ID format:
 Example:
 
 ```bash
-terraform import azacl_file_acl.profiles_root fsxavdfshybride64e1a/profiles/directory//
+terraform import azurefilesacl_file_acl.profiles_root fsxavdfshybride64e1a/profiles/directory//
 ```
 
 Import reads the target identity and sets the resource to `mode = "validate"`. It does not reverse-engineer arbitrary existing ACEs into Terraform configuration.
@@ -241,7 +252,7 @@ cd examples/fslogix-root-acl
 ./test-local.sh plan
 ```
 
-The helper builds the provider into `/tmp/azacl-dev` and sets `TF_CLI_CONFIG_FILE` to the example `dev.tfrc`.
+The helper builds the provider into `/tmp/azurefilesacl-dev` and sets `TF_CLI_CONFIG_FILE` to the example `dev.tfrc`.
 
 ## Known Limitations
 

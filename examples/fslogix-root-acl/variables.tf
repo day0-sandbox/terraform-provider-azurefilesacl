@@ -35,7 +35,7 @@ variable "share_name" {
 }
 
 variable "acl_mode" {
-  description = "ACL mode for azacl_file_acl. Defaults to additive, which adds missing managed ACEs while preserving existing ACL entries."
+  description = "ACL mode for azurefilesacl_file_acl. Defaults to additive, which adds missing managed ACEs while preserving existing ACL entries."
   type        = string
   default     = "additive"
 }

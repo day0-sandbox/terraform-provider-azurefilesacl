@@ -1,11 +1,11 @@
-provider "azacl" {
+provider "azurefilesacl" {
   tenant_id   = var.tenant_id
   auth_method = var.auth_method
   account_key = var.account_key
   sas_token   = var.sas_token
 }
 
-resource "azacl_file_acl" "profiles_root" {
+resource "azurefilesacl_file_acl" "profiles_root" {
   storage_account_name = var.storage_account_name
   share_name           = var.share_name
   path                 = "/"

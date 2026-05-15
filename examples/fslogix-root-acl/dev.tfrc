@@ -1,6 +1,6 @@
 provider_installation {
   dev_overrides {
-    "irisdotsh/azacl" = "/tmp/azacl-dev"
+    "day0-sandbox/azurefilesacl" = "/tmp/azurefilesacl-dev"
   }
 
   direct {}

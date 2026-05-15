@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROVIDER_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-DEV_PROVIDER_DIR="${DEV_PROVIDER_DIR:-/tmp/azacl-dev}"
+DEV_PROVIDER_DIR="${DEV_PROVIDER_DIR:-/tmp/azurefilesacl-dev}"
 GO_BIN="${GO_BIN:-go}"
 STORAGE_ACCOUNT_RESOURCE_GROUP_NAME="${STORAGE_ACCOUNT_RESOURCE_GROUP_NAME:-rg-avd-fslogix-hybrid}"
 
@@ -17,7 +17,7 @@ if ! command -v "${GO_BIN}" >/dev/null 2>&1; then
 fi
 
 mkdir -p "${DEV_PROVIDER_DIR}"
-GOTOOLCHAIN=auto "${GO_BIN}" -C "${PROVIDER_ROOT}" build -o "${DEV_PROVIDER_DIR}/terraform-provider-azacl" .
+GOTOOLCHAIN=auto "${GO_BIN}" -C "${PROVIDER_ROOT}" build -o "${DEV_PROVIDER_DIR}/terraform-provider-azurefilesacl" .
 
 export TF_CLI_CONFIG_FILE="${SCRIPT_DIR}/dev.tfrc"
 

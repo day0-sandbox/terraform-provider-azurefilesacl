@@ -45,7 +45,7 @@ func New(version string) func() provider.Provider {
 }
 
 func (p *Provider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
-	resp.TypeName = "azacl"
+	resp.TypeName = "azurefilesacl"
 	resp.Version = p.version
 }
 

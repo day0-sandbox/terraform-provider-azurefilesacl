@@ -1,10 +1,6 @@
 # FSLogix Root ACL Local Test
 
-This example is prefilled from the local hybrid workload:
-
-```text
-/mnt/d/repos/day0sh/tf-avd-complete-module/workloads/hybrid-identities
-```
+This example validates and applies FSLogix root ACLs against an existing Azure Files share.
 
 Run the local validation:
 
@@ -18,15 +14,15 @@ Run a local plan:
 ./test-local.sh plan
 ```
 
-The helper builds the provider into `/tmp/azacl-dev` and sets `TF_CLI_CONFIG_FILE` to this example's real `dev.tfrc` path.
+The helper builds the provider into `/tmp/azurefilesacl-dev` and sets `TF_CLI_CONFIG_FILE` to this example's real `dev.tfrc` path.
 
 Manual equivalent:
 
 ```bash
-mkdir -p /tmp/azacl-dev
-GOTOOLCHAIN=auto /tmp/go/bin/go -C /mnt/d/repos/day0sh/terraform-provider-azacl build -o /tmp/azacl-dev/terraform-provider-azacl .
+mkdir -p /tmp/azurefilesacl-dev
+GOTOOLCHAIN=auto go -C ../.. build -o /tmp/azurefilesacl-dev/terraform-provider-azurefilesacl .
 
-TF_CLI_CONFIG_FILE=/mnt/d/repos/day0sh/terraform-provider-azacl/examples/fslogix-root-acl/dev.tfrc terraform -chdir=/mnt/d/repos/day0sh/terraform-provider-azacl/examples/fslogix-root-acl validate
+TF_CLI_CONFIG_FILE="$(pwd)/dev.tfrc" terraform -chdir=. validate
 ```
 
 Apply missing managed ACEs while preserving existing ACL entries:
