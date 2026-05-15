@@ -205,3 +205,13 @@ func TestPopulateComputedMissingManagedACEsList(t *testing.T) {
 		t.Fatalf("unexpected missing ACEs\nexpected: %#v\nactual:   %#v", expected, missing)
 	}
 }
+
+func TestStorageAccountNameFromResourceID(t *testing.T) {
+	name, err := storageAccountNameFromResourceID("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.Storage/storageAccounts/sttest")
+	if err != nil {
+		t.Fatalf("storageAccountNameFromResourceID returned error: %v", err)
+	}
+	if name != "sttest" {
+		t.Fatalf("unexpected storage account name\nexpected: sttest\nactual:   %s", name)
+	}
+}

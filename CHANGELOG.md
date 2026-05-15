@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0
+
+- Remove the redundant `storage_account_name` argument from `azurefilesacl_file_acl`.
+- Require `storage_account_resource_id` and derive the storage account name from that ARM ID while preserving OAuth direct access and ARM `listKeys` fallback behavior.
+- Update examples and import documentation for the single storage-account identifier.
+
 ## v0.1.1
 
 - Fall back from direct Azure Files OAuth ACL calls to ARM `listKeys` plus shared-key file clients when `storage_account_resource_id` is set and the operator lacks privileged Azure Files bearer-token ACL permissions.

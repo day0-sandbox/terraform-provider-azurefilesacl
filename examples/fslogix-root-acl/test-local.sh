@@ -5,7 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROVIDER_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 DEV_PROVIDER_DIR="${DEV_PROVIDER_DIR:-/tmp/azurefilesacl-dev}"
 GO_BIN="${GO_BIN:-go}"
-STORAGE_ACCOUNT_RESOURCE_GROUP_NAME="${STORAGE_ACCOUNT_RESOURCE_GROUP_NAME:-rg-avd-fslogix-hybrid}"
 
 if ! command -v "${GO_BIN}" >/dev/null 2>&1; then
   if [[ -x /tmp/go/bin/go ]]; then
@@ -22,16 +21,24 @@ GOTOOLCHAIN=auto "${GO_BIN}" -C "${PROVIDER_ROOT}" build -o "${DEV_PROVIDER_DIR}
 export TF_CLI_CONFIG_FILE="${SCRIPT_DIR}/dev.tfrc"
 
 get_storage_account_key() {
+  local storage_account_id
   local storage_account_name
+  local storage_account_resource_group_name
 
-  storage_account_name="$(
+  storage_account_id="$(
     terraform -chdir="${SCRIPT_DIR}" console <<'EOF' | tr -d '"'
-var.storage_account_name
+var.storage_account_resource_id
 EOF
+  )"
+  read -r storage_account_name storage_account_resource_group_name <<<"$(
+    az resource show \
+      --ids "${storage_account_id}" \
+      --query '[name, resourceGroup]' \
+      -o tsv
   )"
 
   az storage account keys list \
-    --resource-group "${STORAGE_ACCOUNT_RESOURCE_GROUP_NAME}" \
+    --resource-group "${storage_account_resource_group_name}" \
     --account-name "${storage_account_name}" \
     --query '[0].value' \
     -o tsv

@@ -1,12 +1,6 @@
-variable "storage_account_name" {
-  description = "Storage account name that hosts the FSLogix profile share."
-  type        = string
-}
-
 variable "storage_account_resource_id" {
   description = "ARM resource ID for the storage account that hosts the FSLogix profile share."
   type        = string
-  default     = null
 }
 
 variable "tenant_id" {

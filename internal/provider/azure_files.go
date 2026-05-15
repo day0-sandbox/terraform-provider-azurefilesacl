@@ -198,9 +198,6 @@ func (c *azureFilesClient) resolveStorageAccountKey(ctx context.Context, target 
 		return "", fmt.Errorf("parse storage_account_resource_id %q: %w", target.StorageAccountResourceID, err)
 	}
 
-	if !strings.EqualFold(resourceID.Name, target.StorageAccountName) {
-		return "", fmt.Errorf("storage_account_resource_id %q resolves to account %q, which does not match storage_account_name %q", target.StorageAccountResourceID, resourceID.Name, target.StorageAccountName)
-	}
 	if resourceID.SubscriptionID == "" || resourceID.ResourceGroupName == "" {
 		return "", fmt.Errorf("storage_account_resource_id %q must include both subscription ID and resource group name", target.StorageAccountResourceID)
 	}
@@ -231,6 +228,17 @@ func (c *azureFilesClient) resolveStorageAccountKey(ctx context.Context, target 
 	}
 
 	return "", fmt.Errorf("ARM listKeys returned no usable storage account key for %q", target.StorageAccountResourceID)
+}
+
+func storageAccountNameFromResourceID(storageAccountResourceID string) (string, error) {
+	resourceID, err := arm.ParseResourceID(storageAccountResourceID)
+	if err != nil {
+		return "", fmt.Errorf("parse storage_account_resource_id %q: %w", storageAccountResourceID, err)
+	}
+	if resourceID.Name == "" {
+		return "", fmt.Errorf("storage_account_resource_id %q must include the storage account name", storageAccountResourceID)
+	}
+	return resourceID.Name, nil
 }
 
 func readPermissionKey(ctx context.Context, shareClient *share.Client, target fileACLTarget) (string, error) {

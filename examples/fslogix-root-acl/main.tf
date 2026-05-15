@@ -6,7 +6,6 @@ provider "azurefilesacl" {
 }
 
 resource "azurefilesacl_file_acl" "profiles_root" {
-  storage_account_name        = var.storage_account_name
   storage_account_resource_id = var.storage_account_resource_id
   share_name                  = var.share_name
   path                        = "/"

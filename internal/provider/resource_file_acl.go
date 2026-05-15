@@ -25,7 +25,6 @@ type FileACLResource struct {
 
 type FileACLResourceModel struct {
 	ID                          types.String              `tfsdk:"id"`
-	StorageAccountName          types.String              `tfsdk:"storage_account_name"`
 	StorageAccountResourceID    types.String              `tfsdk:"storage_account_resource_id"`
 	ShareName                   types.String              `tfsdk:"share_name"`
 	Path                        types.String              `tfsdk:"path"`
@@ -79,13 +78,9 @@ func (r *FileACLResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"id": schema.StringAttribute{
 				Computed: true,
 			},
-			"storage_account_name": schema.StringAttribute{
-				Required:            true,
-				MarkdownDescription: "Storage account name.",
-			},
 			"storage_account_resource_id": schema.StringAttribute{
-				Optional:            true,
-				MarkdownDescription: "Optional ARM resource ID for the storage account. When `auth_method = \"oauth\"`, the provider can use this to fall back to ARM `listKeys` plus shared-key Azure Files calls if direct bearer-token ACL reads or writes are unauthorized.",
+				Required:            true,
+				MarkdownDescription: "ARM resource ID for the storage account. The provider derives the storage account name from this ID and, when `auth_method = \"oauth\"`, can fall back to ARM `listKeys` plus shared-key Azure Files calls if direct bearer-token ACL reads or writes are unauthorized.",
 			},
 			"share_name": schema.StringAttribute{
 				Required:            true,
@@ -291,14 +286,14 @@ func (r *FileACLResource) Delete(ctx context.Context, req resource.DeleteRequest
 }
 
 func (r *FileACLResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	parts := strings.SplitN(req.ID, "/", 4)
+	parts := strings.SplitN(req.ID, "|", 4)
 	if len(parts) != 4 || parts[0] == "" || parts[1] == "" || parts[2] == "" || parts[3] == "" {
-		resp.Diagnostics.AddError("Invalid import ID", "Expected import ID format: {storage_account_name}/{share_name}/{resource_type}/{path}.")
+		resp.Diagnostics.AddError("Invalid import ID", "Expected import ID format: {storage_account_resource_id}|{share_name}|{resource_type}|{path}.")
 		return
 	}
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("storage_account_name"), parts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("storage_account_resource_id"), parts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("share_name"), parts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("resource_type"), parts[2])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("path"), parts[3])...)
@@ -384,10 +379,16 @@ func (r *FileACLResource) read(ctx context.Context, state FileACLResourceModel) 
 
 func expandFileACLConfig(ctx context.Context, model FileACLResourceModel) (effectiveFileACLConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
+	storageAccountResourceID := model.StorageAccountResourceID.ValueString()
+	storageAccountName, err := storageAccountNameFromResourceID(storageAccountResourceID)
+	if err != nil {
+		diags.AddAttributeError(path.Root("storage_account_resource_id"), "Invalid storage account resource ID", err.Error())
+	}
+
 	config := effectiveFileACLConfig{
 		Target: fileACLTarget{
-			StorageAccountName:       model.StorageAccountName.ValueString(),
-			StorageAccountResourceID: stringDefault(model.StorageAccountResourceID, ""),
+			StorageAccountName:       storageAccountName,
+			StorageAccountResourceID: storageAccountResourceID,
 			ShareName:                model.ShareName.ValueString(),
 			Path:                     stringDefault(model.Path, "/"),
 			ResourceType:             stringDefault(model.ResourceType, "directory"),
