@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.1
+
+- Fall back from direct Azure Files OAuth ACL calls to ARM `listKeys` plus shared-key file clients when `storage_account_resource_id` is set and the operator lacks privileged Azure Files bearer-token ACL permissions.
+- Add the optional `storage_account_resource_id` argument to `azurefilesacl_file_acl` so Terraform configurations can opt into that fallback path.
+- Improve the FSLogix root ACL example and docs for the mixed ARM plus Azure Files permission model.
+
 ## v0.1.0
 
 - Initial public release of the `azurefilesacl` Terraform provider.

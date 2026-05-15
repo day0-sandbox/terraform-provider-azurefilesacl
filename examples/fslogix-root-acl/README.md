@@ -31,7 +31,10 @@ Apply missing managed ACEs while preserving existing ACL entries:
 ./test-local.sh apply
 ```
 
-For this local example, `apply` uses account-key auth because the current Azure CLI identity does not have the Azure Files privileged data-plane permissions required for OAuth ACL reads.
+For this local example, `apply` can use either:
+
+- `auth_method=oauth` with `storage_account_resource_id` so the provider can fall back to ARM `listKeys`, or
+- `auth_method=account_key` for explicit local validation.
 
 Run the additive write path explicitly:
 

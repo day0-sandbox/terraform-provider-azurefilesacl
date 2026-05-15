@@ -26,6 +26,7 @@ type FileACLResource struct {
 type FileACLResourceModel struct {
 	ID                          types.String              `tfsdk:"id"`
 	StorageAccountName          types.String              `tfsdk:"storage_account_name"`
+	StorageAccountResourceID    types.String              `tfsdk:"storage_account_resource_id"`
 	ShareName                   types.String              `tfsdk:"share_name"`
 	Path                        types.String              `tfsdk:"path"`
 	ResourceType                types.String              `tfsdk:"resource_type"`
@@ -81,6 +82,10 @@ func (r *FileACLResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"storage_account_name": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "Storage account name.",
+			},
+			"storage_account_resource_id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Optional ARM resource ID for the storage account. When `auth_method = \"oauth\"`, the provider can use this to fall back to ARM `listKeys` plus shared-key Azure Files calls if direct bearer-token ACL reads or writes are unauthorized.",
 			},
 			"share_name": schema.StringAttribute{
 				Required:            true,
@@ -381,10 +386,11 @@ func expandFileACLConfig(ctx context.Context, model FileACLResourceModel) (effec
 	var diags diag.Diagnostics
 	config := effectiveFileACLConfig{
 		Target: fileACLTarget{
-			StorageAccountName: model.StorageAccountName.ValueString(),
-			ShareName:          model.ShareName.ValueString(),
-			Path:               stringDefault(model.Path, "/"),
-			ResourceType:       stringDefault(model.ResourceType, "directory"),
+			StorageAccountName:       model.StorageAccountName.ValueString(),
+			StorageAccountResourceID: stringDefault(model.StorageAccountResourceID, ""),
+			ShareName:                model.ShareName.ValueString(),
+			Path:                     stringDefault(model.Path, "/"),
+			ResourceType:             stringDefault(model.ResourceType, "directory"),
 		},
 		Mode:                        stringDefault(model.Mode, "additive"),
 		PreserveExistingUnknownACEs: boolDefault(model.PreserveExistingUnknownACEs, true),

@@ -31,6 +31,7 @@ Manages Windows ACLs on an Azure Files directory or file.
 - `path` (String) Directory or file path inside the share. Defaults to `/`.
 - `preserve_existing_unknown_aces` (Boolean) Whether unknown existing ACEs must be preserved. Defaults to true. Authoritative mode requires this to be explicitly false.
 - `resource_type` (String) Target type. Supported values: `directory` and `file`. Defaults to `directory`.
+- `storage_account_resource_id` (String) Optional ARM resource ID for the storage account. When `auth_method = "oauth"`, the provider can use this to fall back to ARM `listKeys` plus shared-key Azure Files calls if direct bearer-token ACL reads or writes are unauthorized.
 
 ### Read-Only
 

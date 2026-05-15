@@ -3,6 +3,12 @@ variable "storage_account_name" {
   type        = string
 }
 
+variable "storage_account_resource_id" {
+  description = "ARM resource ID for the storage account that hosts the FSLogix profile share."
+  type        = string
+  default     = null
+}
+
 variable "tenant_id" {
   description = "Azure tenant ID used for OAuth authentication."
   type        = string

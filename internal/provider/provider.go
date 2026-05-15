@@ -59,7 +59,7 @@ func (p *Provider) Schema(ctx context.Context, req provider.SchemaRequest, resp 
 			},
 			"auth_method": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Authentication method for Azure Files data-plane calls. Supported values: `oauth`, `sas`, `account_key`. Defaults to `oauth`.",
+				MarkdownDescription: "Authentication method for Azure Files data-plane calls. Supported values: `oauth`, `sas`, `account_key`. Defaults to `oauth`. When a resource also sets `storage_account_resource_id`, `oauth` can fall back to ARM `listKeys` plus shared-key Azure Files calls if direct bearer-token ACL access is unauthorized.",
 			},
 			"storage_endpoint_suffix": schema.StringAttribute{
 				Optional:            true,

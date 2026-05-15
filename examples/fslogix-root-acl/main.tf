@@ -6,10 +6,11 @@ provider "azurefilesacl" {
 }
 
 resource "azurefilesacl_file_acl" "profiles_root" {
-  storage_account_name = var.storage_account_name
-  share_name           = var.share_name
-  path                 = "/"
-  resource_type        = "directory"
+  storage_account_name        = var.storage_account_name
+  storage_account_resource_id = var.storage_account_resource_id
+  share_name                  = var.share_name
+  path                        = "/"
+  resource_type               = "directory"
 
   mode                           = var.acl_mode
   preserve_existing_unknown_aces = var.preserve_existing_unknown_aces

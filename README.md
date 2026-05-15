@@ -18,6 +18,7 @@ terraform {
 ```hcl
 resource "azurefilesacl_file_acl" "profiles_root" {
   storage_account_name = var.storage_account_name
+  storage_account_resource_id = var.storage_account_resource_id
   share_name           = var.share_name
   path                 = "/"
   resource_type        = "directory"
@@ -71,7 +72,7 @@ provider "azurefilesacl" {
 
 Supported authentication methods:
 
-- `oauth`: Uses ambient Azure credentials through `DefaultAzureCredential`. For Azure Files ACL reads and writes, the identity needs privileged Azure Files data-plane permissions.
+- `oauth`: Uses ambient Azure credentials through `DefaultAzureCredential`. The provider first attempts direct Azure Files bearer-token access. When `storage_account_resource_id` is set and that bearer-token path is unauthorized, the provider falls back to ARM `listKeys` plus shared-key Azure Files calls. This matches common Terraform operator permissions more closely than requiring privileged Azure Files backup roles.
 - `account_key`: Uses a storage account key. Intended for local testing, prototype validation, or break-glass operation.
 - `sas`: Uses a storage SAS token with the required Azure Files data-plane permissions.
 
@@ -92,6 +93,7 @@ Required arguments:
 Optional arguments:
 
 - `path`: Directory or file path inside the share. Defaults to `/`.
+- `storage_account_resource_id`: Optional ARM resource ID for the storage account. Recommended with `auth_method = "oauth"` so the provider can fall back to ARM `listKeys` when direct Azure Files bearer-token ACL access is unauthorized.
 - `resource_type`: `directory` or `file`. Defaults to `directory`.
 - `mode`: `validate`, `additive`, or `authoritative`. Defaults to `additive`.
 - `preserve_existing_unknown_aces`: Defaults to `true`.
