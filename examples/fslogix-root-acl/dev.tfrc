@@ -1,6 +1,6 @@
 provider_installation {
   dev_overrides {
-    "day0sh/azurefilesacl" = "/tmp/azurefilesacl-dev"
+    "day0-sandbox/azurefilesacl" = "/tmp/azurefilesacl-dev"
   }
 
   direct {}

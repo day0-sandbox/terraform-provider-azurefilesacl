@@ -8,7 +8,7 @@ This provider is designed for Azure Virtual Desktop and FSLogix deployments that
 terraform {
   required_providers {
     azurefilesacl = {
-      source  = "day0sh/azurefilesacl"
+      source  = "day0-sandbox/azurefilesacl"
       version = "~> 0.1"
     }
   }

@@ -1,9 +1,5 @@
 # Changelog
 
-## v0.1.1
-
-- Move the public provider source to `day0sh/azurefilesacl`.
-
 ## v0.1.0
 
 - Initial public release of the `azurefilesacl` Terraform provider.
