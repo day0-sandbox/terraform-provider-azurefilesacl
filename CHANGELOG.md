@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.0
+
+- Add `azurefilesacl_avd_session_host_cleanup` for pre-create AVD session-host artifact cleanup during same-name VM replacement.
+- Add `azurefilesacl_avd_session_host_cleanup_marker` for destroy-time cleanup after the session-host VM is removed.
+- Support opt-in deletion of stale AVD `sessionHost` records, Entra device objects, and Intune managed-device objects.
+
 ## v0.2.0
 
 - Remove the redundant `storage_account_name` argument from `azurefilesacl_file_acl`.
