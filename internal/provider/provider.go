@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -13,6 +14,7 @@ import (
 )
 
 var _ provider.Provider = (*Provider)(nil)
+var _ provider.ProviderWithActions = (*Provider)(nil)
 
 type Provider struct {
 	version string
@@ -24,6 +26,7 @@ type ProviderModel struct {
 	StorageEndpointSuffix types.String `tfsdk:"storage_endpoint_suffix"`
 	GraphEndpoint         types.String `tfsdk:"graph_endpoint"`
 	GraphAPIVersion       types.String `tfsdk:"graph_api_version"`
+	ARMEndpoint           types.String `tfsdk:"arm_endpoint"`
 	AccountKey            types.String `tfsdk:"account_key"`
 	SASToken              types.String `tfsdk:"sas_token"`
 }
@@ -34,6 +37,7 @@ type ProviderConfig struct {
 	StorageEndpointSuffix string
 	GraphEndpoint         string
 	GraphAPIVersion       string
+	ARMEndpoint           string
 	AccountKey            string
 	SASToken              string
 }
@@ -51,7 +55,7 @@ func (p *Provider) Metadata(ctx context.Context, req provider.MetadataRequest, r
 
 func (p *Provider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Provider for managing Windows ACLs on Azure Files objects.",
+		MarkdownDescription: "Provider for managing Windows ACLs on Azure Files objects and Azure Virtual Desktop session-host cleanup operations.",
 		Attributes: map[string]schema.Attribute{
 			"tenant_id": schema.StringAttribute{
 				Optional:            true,
@@ -72,6 +76,10 @@ func (p *Provider) Schema(ctx context.Context, req provider.SchemaRequest, resp 
 			"graph_api_version": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Microsoft Graph API version. Defaults to `beta`.",
+			},
+			"arm_endpoint": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Azure Resource Manager endpoint. Defaults to `https://management.azure.com`.",
 			},
 			"account_key": schema.StringAttribute{
 				Optional:            true,
@@ -121,12 +129,14 @@ func (p *Provider) Configure(ctx context.Context, req provider.ConfigureRequest,
 		StorageEndpointSuffix: strings.TrimPrefix(stringDefault(config.StorageEndpointSuffix, "core.windows.net"), "."),
 		GraphEndpoint:         strings.TrimRight(stringDefault(config.GraphEndpoint, "https://graph.microsoft.com"), "/"),
 		GraphAPIVersion:       stringDefault(config.GraphAPIVersion, "beta"),
+		ARMEndpoint:           strings.TrimRight(stringDefault(config.ARMEndpoint, "https://management.azure.com"), "/"),
 		AccountKey:            stringDefault(config.AccountKey, ""),
 		SASToken:              stringDefault(config.SASToken, ""),
 	}
 
 	resp.ResourceData = providerConfig
 	resp.DataSourceData = providerConfig
+	resp.ActionData = providerConfig
 }
 
 func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSource {
@@ -136,6 +146,13 @@ func (p *Provider) DataSources(ctx context.Context) []func() datasource.DataSour
 func (p *Provider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewFileACLResource,
+		NewAVDSessionHostCleanupMarkerResource,
+	}
+}
+
+func (p *Provider) Actions(ctx context.Context) []func() action.Action {
+	return []func() action.Action{
+		NewAVDSessionHostCleanupAction,
 	}
 }
 

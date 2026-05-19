@@ -1,6 +1,6 @@
 # terraform-provider-azurefilesacl
 
-Terraform provider for managing Windows ACLs on Azure Files directories and files.
+Terraform provider for managing Windows ACLs on Azure Files directories and files, plus Azure Virtual Desktop session-host cleanup operations.
 
 This provider is designed for Azure Virtual Desktop and FSLogix deployments that need Terraform-managed NTFS-style ACLs on Azure Files. It replaces ad hoc post-apply ACL scripts with a declarative resource:
 
@@ -9,7 +9,7 @@ terraform {
   required_providers {
     azurefilesacl = {
       source  = "day0-sandbox/azurefilesacl"
-      version = "~> 0.2"
+      version = "~> 0.3"
     }
   }
 }
@@ -60,6 +60,7 @@ provider "azurefilesacl" {
   storage_endpoint_suffix = "core.windows.net"
   graph_endpoint          = "https://graph.microsoft.com"
   graph_api_version       = "beta"
+  arm_endpoint            = "https://management.azure.com"
 
   # Required only for auth_method = "account_key".
   account_key = var.account_key
@@ -76,6 +77,46 @@ Supported authentication methods:
 - `sas`: Uses a storage SAS token with the required Azure Files data-plane permissions.
 
 `account_key` and `sas_token` are marked sensitive, but Terraform can still store sensitive values in state. Avoid committing state files.
+
+## AVD Session-Host Cleanup
+
+The provider includes AVD-prefixed cleanup types for replacing or destroying Entra-joined AVD session hosts that can leave stale broker, Entra device, or Intune managed-device artifacts behind.
+
+Use the action for same-name VM replacement cleanup:
+
+```hcl
+action "azurefilesacl_avd_session_host_cleanup" "pre_create" {
+  config {
+    host_pool_id        = var.host_pool_id
+    resource_group_name = var.resource_group_name
+    session_host_name   = var.session_host_name
+
+    cleanup_avd_session_host      = true
+    cleanup_entra_device          = false
+    cleanup_intune_managed_device = false
+    require_vm_absent             = true
+    force_user_sessions           = false
+  }
+}
+```
+
+Use the marker resource for full-destroy cleanup. The session-host VM must depend on the marker so Terraform destroys the VM before deleting the marker:
+
+```hcl
+resource "azurefilesacl_avd_session_host_cleanup_marker" "this" {
+  host_pool_id        = var.host_pool_id
+  resource_group_name = var.resource_group_name
+  session_host_name   = var.session_host_name
+
+  cleanup_avd_session_host      = true
+  cleanup_entra_device          = false
+  cleanup_intune_managed_device = false
+  require_vm_absent             = true
+  force_user_sessions           = false
+}
+```
+
+Entra and Intune cleanup are opt-in and require the executing identity to have the corresponding Microsoft Graph delete permissions.
 
 ## Resource
 
